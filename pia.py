@@ -7,26 +7,33 @@ Created on Tue Aug 22 18:10:49 2017
 """
 
 from PIL import Image
-import face_recognition
-
-# Load the jpg file into a numpy array
-#image = face_recognition.load_image_file("/Users/Christoph/Desktop/Testbilder/iu.jpeg")
-image = face_recognition.load_image_file("/Users/Christoph/Desktop/iu-4.jpeg")
-
-#detect all faces
-face_locations = face_recognition.face_locations(image)
-print("I found {} face(s) in this photograph.".format(len(face_locations)))
+import dlib
+from skimage import io
+from datetime import datetime
 
 
-for face_location in face_locations:
+print("start processing: {}".format(datetime.now()))
 
-    # Print the location of each face in this image
-    top, right, bottom, left = face_location
-    print("A face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
+cnn_face_detection_model = dlib.cnn_face_detection_model_v1("/Users/Christoph/Desktop/Testbilder/mmod_human_face_detector.dat")
 
-    # You can access the actual face itself like this:
-    face_image = image[top:bottom, left:right]
-    pil_image = Image.fromarray(face_image)
-    pil_image.show()
+img = io.imread("/Users/Christoph/Desktop/Testbilder/iu-2.jpeg")
+dets = cnn_face_detection_model.cnn_face_detector(img, 1)
+
+print("Number of faces detected: {}".format(len(dets)))
+
+for i, d in enumerate(dets):
+    left = d.left()
+    right = d.right()
+    top = d.top()
+    bottom = d.bottom()
+
+    print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(i, left, top, right, bottom))
+
+    face_image = img[top:bottom, left:right]
+    pil_img = Image.fromarray(face_image)
+    pil_img.show()
+
+    print("time after processing picture: {}".format(datetime.now()))
+    dlib.hit_enter_to_continue()
 
 print("Finished ^o^")
